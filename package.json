@@ -4,9 +4,29 @@
     "description": "Mi aplicación Node.js",
     "main": "index.js",
     "scripts": {
-      "start": "node index.js"
+        "test": "jest"
+    },
+    "jest": {
+        "testEnvironment": "node"
     },
     "dependencies": {
-      "express": "^4.18.2"
-    }
-  }
+        "express": "^4.22.1",
+        "jest": "^30.2.0",
+        "supertest": "^7.2.2"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Joseline1997/practica-plataforma.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Joseline1997/practica-plataforma/issues"
+    },
+    "homepage": "https://github.com/Joseline1997/practica-plataforma#readme",
+    "directories": {
+        "test": "test"
+    },
+    "devDependencies": {}
+}
