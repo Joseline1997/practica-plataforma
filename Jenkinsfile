@@ -1,38 +1,30 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs "NodeJS"         
-    }
-
     stages {
-        stage('Instalar dependencias') {
-            steps {
-                sh 'npm install'
+        stage('Instalar y Testear (En Contenedor)') {
+            agent {
+                docker { 
+                    // Usamos una imagen que YA tiene Node instalado. 
+                    // Así Jenkins no tiene que descargar nada.
+                    image 'node:20-alpine' 
+                    // Esto asegura que use los archivos de tu proyecto
+                    reuseNode true 
+                }
             }
-        }
-
-        stage('Ejecutar tests') {
             steps {
-                sh 'chmod +x ./node_modules/.bin/jest'  // Soluciona el problema de permisos
+                sh 'node --version' // Para verificar que funciona
+                sh 'npm install'
+                sh 'chmod +x ./node_modules/.bin/jest'
                 sh 'npm test -- --ci --runInBand'
             }
         }
 
-        stage('Construir Imagen Docker') {
-            when {
-                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
-            }
+        stage('Construir y Desplegar (En Host)') {
+            // Esta etapa corre fuera del contenedor de Node, 
+            // usando el Docker de tu sistema principal.
             steps {
                 sh 'docker build -t hola-mundo-node:latest .'
-            }
-        }
-
-        stage('Ejecutar Contenedor Node.js') {
-            when {
-                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
-            }
-            steps {
                 sh '''
                     docker stop hola-mundo-node || true
                     docker rm hola-mundo-node || true
@@ -42,4 +34,3 @@ pipeline {
         }
     }
 }
- 
