@@ -2,20 +2,20 @@ pipeline {
     agent any
 
     tools {
-        nodejs "Node22"        
+        nodejs "Node22"
+        dockerTool "Dockertool" 
     }
 
     stages {
         stage('Instalar dependencias') {
             steps {
+                sh 'chmod +x -R node_modules/.bin/'
                 sh 'npm install'
             }
         }
-
         stage('Ejecutar tests') {
             steps {
-                sh 'chmod +x ./node_modules/.bin/jest'  // Soluciona el problema de permisos
-                sh 'npm test -- --ci --runInBand'
+                sh 'npm test'
             }
         }
 
