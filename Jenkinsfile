@@ -1,39 +1,44 @@
-const request = require('supertest');
-const express = require('express');
-const fs = require('fs');
-const app = require('../index'); // Necesitamos exportar `app` desde index.js
+pipeline {
+    agent any
 
-describe('API de usuarios', () => {
-  const testUser = { id: 'test123', name: 'Test User', email: 'test@example.com' };
+    tools {
+        nodejs "Node25"
+        dockerTool "Dockertool" 
+    }
 
-  afterAll(() => {
-    // Limpieza: eliminar usuario de prueba si existe
-    const users = JSON.parse(fs.readFileSync('./users.json', 'utf8'));
-    const filtered = users.filter(u => u.id !== testUser.id);
-    fs.writeFileSync('./users.json', JSON.stringify(filtered, null, 2), 'utf8');
-  });
+    stages {
+        stage('Instalar dependencias') {
+            steps {
+                sh 'chmod +x -R node_modules/.bin/'
+                sh 'npm install'
+            }
+        }
+        stage('Ejecutar tests') {
+            steps {
+                sh 'npm test'
+            }
+        }
 
-  it('Debe responder el endpoint raíz', async () => {
-    const res = await request(app).get('/');
-    expect(res.statusCode).toBe(200);
-    expect(res.body.message).toMatch(/Servidor en ejecucion/i);
-  });
+        stage('Construir Imagen Docker') {
+            when {
+                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
+            }
+            steps {
+                sh 'docker build -t hola-mundo-node:latest .'
+            }
+        }
 
-  it('Debe crear un nuevo usuario', async () => {
-    const res = await request(app).post('/users').send(testUser);
-    expect(res.statusCode).toBe(201);
-    expect(res.body.user).toMatchObject(testUser);
-  });
-
-    it('Debe obtener todos los usuarios', async () => {
-    const res = await request(app).get('/users');
-    expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    });
-
-    it('Debe buscar el usuario creado', async () => {
-    const res = await request(app).get(`/users/${testUser.id}`);
-    expect(res.statusCode).toBe(200);
-    expect(res.body.user).toMatchObject(testUser);
-    });
-});
+        stage('Ejecutar Contenedor Node.js') {
+            when {
+                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
+            }
+            steps {
+                sh '''
+                    docker stop hola-mundo-node || true
+                    docker rm hola-mundo-node || true
+                    docker run -d --name hola-mundo-node -p 3000:3000 hola-mundo-node:latest
+                '''
+            }
+        }
+    }
+}
