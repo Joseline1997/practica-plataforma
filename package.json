@@ -14,18 +14,18 @@
         "jest": "^30.2.0",
         "supertest": "^7.2.2"
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "directories": {
-        "test": "tests"
-    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/Joseline1997/practica-plataforma.git"
     },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
     "bugs": {
         "url": "https://github.com/Joseline1997/practica-plataforma/issues"
     },
-    "homepage": "https://github.com/Joseline1997/practica-plataforma#readme"
+    "homepage": "https://github.com/Joseline1997/practica-plataforma#readme",
+    "directories": {
+        "test": "tests"
+    }
 }
